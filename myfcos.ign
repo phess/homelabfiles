@@ -1,55 +1,44 @@
-variant: fcos
-version: 1.1.0
-passwd:
-  users:
-    - name: user1
-      ssh_authorized_keys:
-        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIA7d28zIV/tmBwm0aFRcl2O0aRcQwVtVGao1J5yjQRdsAAAABHNzaDo= chave amarela
-      home_dir: /home/pablo
-      no_create_home: false
-      groups:
-        - wheel
-        - plugdev
-      shell: /bin/bash
-storage:
-  directories:
-    - path: /etc/ucore-autorebase
-      mode: 0754
-systemd:
-  units:
-    - name: ucore-unsigned-autorebase.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=uCore autorebase to unsigned OCI and reboot
-        ConditionPathExists=!/etc/ucore-autorebase/unverified
-        ConditionPathExists=!/etc/ucore-autorebase/signed
-        After=network-online.target
-        Wants=network-online.target
-        [Service]
-        Type=oneshot
-        StandardOutput=journal+console
-        ExecStart=/usr/bin/rpm-ostree rebase --bypass-driver ostree-unverified-registry:ghcr.io/ublue-os/ucore:stable
-        ExecStart=/usr/bin/touch /etc/ucore-autorebase/unverified
-        ExecStart=/usr/bin/systemctl disable ucore-unsigned-autorebase.service
-        ExecStart=/usr/bin/systemctl reboot
-        [Install]
-        WantedBy=multi-user.target
-    - name: ucore-signed-autorebase.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=uCore autorebase to signed OCI and reboot
-        ConditionPathExists=/etc/ucore-autorebase/unverified
-        ConditionPathExists=!/etc/ucore-autorebase/signed
-        After=network-online.target
-        Wants=network-online.target
-        [Service]
-        Type=oneshot
-        StandardOutput=journal+console
-        ExecStart=/usr/bin/rpm-ostree rebase --bypass-driver ostree-image-signed:docker://ghcr.io/ublue-os/ucore:stable
-        ExecStart=/usr/bin/touch /etc/ucore-autorebase/signed
-        ExecStart=/usr/bin/systemctl disable ucore-signed-autorebase.service
-        ExecStart=/usr/bin/systemctl reboot
-        [Install]
-        WantedBy=multi-user.target
+{
+  "ignition": {
+    "version": "3.1.0"
+  },
+  "passwd": {
+    "users": [
+      {
+        "groups": [
+          "wheel",
+          "plugdev"
+        ],
+        "homeDir": "/home/pablo",
+        "name": "user1",
+        "noCreateHome": false,
+        "sshAuthorizedKeys": [
+          "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIA7d28zIV/tmBwm0aFRcl2O0aRcQwVtVGao1J5yjQRdsAAAABHNzaDo= chave amarela"
+        ],
+        "shell": "/bin/bash"
+      }
+    ]
+  },
+  "storage": {
+    "directories": [
+      {
+        "path": "/etc/ucore-autorebase",
+        "mode": 492
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "contents": "[Unit]\nDescription=uCore autorebase to unsigned OCI and reboot\nConditionPathExists=!/etc/ucore-autorebase/unverified\nConditionPathExists=!/etc/ucore-autorebase/signed\nAfter=network-online.target\nWants=network-online.target\n[Service]\nType=oneshot\nStandardOutput=journal+console\nExecStart=/usr/bin/rpm-ostree rebase --bypass-driver ostree-unverified-registry:ghcr.io/ublue-os/ucore:stable\nExecStart=/usr/bin/touch /etc/ucore-autorebase/unverified\nExecStart=/usr/bin/systemctl disable ucore-unsigned-autorebase.service\nExecStart=/usr/bin/systemctl reboot\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "ucore-unsigned-autorebase.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=uCore autorebase to signed OCI and reboot\nConditionPathExists=/etc/ucore-autorebase/unverified\nConditionPathExists=!/etc/ucore-autorebase/signed\nAfter=network-online.target\nWants=network-online.target\n[Service]\nType=oneshot\nStandardOutput=journal+console\nExecStart=/usr/bin/rpm-ostree rebase --bypass-driver ostree-image-signed:docker://ghcr.io/ublue-os/ucore:stable\nExecStart=/usr/bin/touch /etc/ucore-autorebase/signed\nExecStart=/usr/bin/systemctl disable ucore-signed-autorebase.service\nExecStart=/usr/bin/systemctl reboot\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "ucore-signed-autorebase.service"
+      }
+    ]
+  }
+}
